@@ -11,6 +11,11 @@ const addTodo = () => {
   localStorage.todoList = JSON.stringify(todoListRef.value);
   todoRef.value = '';
 };
+
+const showTodo = (id) => {
+  const todo = todoListRef.value.find((todo) => todo.id === id);
+  todoRef.value = todo.task;
+};
 </script>
 
 <template>
@@ -30,7 +35,7 @@ const addTodo = () => {
           <label>{{ todo.task }}</label>
         </div>
         <div class="btns">
-          <button class="btn green">編</button>
+          <button class="btn green" @click="showTodo(todo.id)">編</button>
           <button class="btn pink">削</button>
         </div>
       </div>
