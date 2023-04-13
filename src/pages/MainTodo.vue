@@ -1,20 +1,28 @@
 <script setup>
 import { ref } from 'vue';
+import { useTodoList } from '../composables/useTodoList';
+
 const todoRef = ref('');
-const todoListRef = ref([]);
-todoListRef.value = localStorage.todoList
-  ? JSON.parse(localStorage.todoList)
-  : [];
+const isEditRef = ref(false);
+const { todoListRef, add, show, edit, del, check } = useTodoList();
 const addTodo = () => {
-  const id = new Date().getTime();
-  todoListRef.value.push({ id: id, task: todoRef.value });
-  localStorage.todoList = JSON.stringify(todoListRef.value);
+  add(todoRef.value);
   todoRef.value = '';
 };
-
 const showTodo = (id) => {
-  const todo = todoListRef.value.find((todo) => todo.id === id);
-  todoRef.value = todo.task;
+  todoRef.value = show(id);
+  isEditRef.value = true;
+};
+const editTodo = () => {
+  edit(todoRef.value);
+  isEditRef.value = false;
+  todoRef.value = '';
+};
+const deleteTodo = (id) => {
+  del(id);
+};
+const changeCheck = (id) => {
+  check(id);
 };
 </script>
 
@@ -26,17 +34,23 @@ const showTodo = (id) => {
       v-model="todoRef"
       placeholder="＋TODOを入力"
     />
-    <button class="btn" @click="addTodo">追加</button>
+    <button class="btn" @click="editTodo()" v-show="isEditRef">変更</button>
+    <button class="btn" @click="addTodo()" v-show="!isEditRef">追加</button>
 
     <div class="box_list">
       <div class="todo_list" v-for="todo in todoListRef" :key="todoListRef.id">
-        <div class="todo">
-          <input type="checkbox" class="check" />
+        <div class="todo" :class="{ fin: todo.checked }">
+          <input
+            type="checkbox"
+            class="check"
+            @change="changeCheck(todo.id)"
+            :checked="todo.checked"
+          />
           <label>{{ todo.task }}</label>
         </div>
         <div class="btns">
           <button class="btn green" @click="showTodo(todo.id)">編</button>
-          <button class="btn pink">削</button>
+          <button class="btn pink" @click="deleteTodo(todo.id)">削</button>
         </div>
       </div>
     </div>
@@ -98,5 +112,11 @@ const showTodo = (id) => {
 
 .pink {
   background-color: #ff4081;
+}
+
+.fin {
+  text-decoration: line-through;
+  background-color: #ddd;
+  color: #777;
 }
 </style>
